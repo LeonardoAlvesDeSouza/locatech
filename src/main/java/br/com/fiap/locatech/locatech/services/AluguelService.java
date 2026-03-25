@@ -3,6 +3,7 @@ package br.com.fiap.locatech.locatech.services;
 import br.com.fiap.locatech.locatech.dtos.AluguelRequestDTO;
 import br.com.fiap.locatech.locatech.entities.Aluguel;
 import br.com.fiap.locatech.locatech.repositories.AluguelRepository;
+import br.com.fiap.locatech.locatech.repositories.PessoaRepository;
 import br.com.fiap.locatech.locatech.repositories.VeiculoRepository;
 import br.com.fiap.locatech.locatech.services.exceptions.ResourceNotFoundExecption;
 import org.springframework.stereotype.Service;
@@ -17,10 +18,12 @@ public class AluguelService {
 
     private final AluguelRepository aluguelRepository;
     private final VeiculoRepository veiculoRepository;
+    private final PessoaRepository pessoaRepository;
 
-    public AluguelService(AluguelRepository aluguelRepository, VeiculoRepository veiculoRepository) {
+    public AluguelService(AluguelRepository aluguelRepository, VeiculoRepository veiculoRepository, PessoaRepository pessoaRepository) {
         this.aluguelRepository = aluguelRepository;
         this.veiculoRepository = veiculoRepository;
+        this.pessoaRepository = pessoaRepository;
     }
 
     public List<Aluguel> findAllAlugueis(int page, int size) {
@@ -34,13 +37,15 @@ public class AluguelService {
     }
 
     public void save(AluguelRequestDTO aluguel) {
+        validaPessoa(aluguel.pessoaId());
         var aluguelEntity = calculaAluguel(aluguel);
         var save = this.aluguelRepository.save(aluguelEntity);
         Assert.state(save == 1, "Erro ao salvar aluguel " + aluguel.pessoaId());
     }
 
-    public void update(Aluguel aluguel, Long id) {
-        var update = this.aluguelRepository.update(aluguel, id);
+    public void update(AluguelRequestDTO aluguel, Long id) {
+        var aluguelEntity = calculaAluguel(aluguel);
+        var update = this.aluguelRepository.update(aluguelEntity, id);
         if (update == 0) {
             throw new RuntimeException("Aluguel não encontrado.");
         }
@@ -51,6 +56,11 @@ public class AluguelService {
         if (delete == 0) {
             throw new RuntimeException("Aluguel não encontrado.");
         }
+    }
+
+    private void validaPessoa(Long idPessoa) {
+        this.pessoaRepository.findById(idPessoa)
+                .orElseThrow(() -> new RuntimeException("Pessoa não encontrada"));
     }
 
     private Aluguel calculaAluguel(AluguelRequestDTO aluguelRequestDTO) {

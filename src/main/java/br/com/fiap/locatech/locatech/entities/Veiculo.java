@@ -2,6 +2,7 @@ package br.com.fiap.locatech.locatech.entities;
 
 import java.math.BigDecimal;
 
+import br.com.fiap.locatech.locatech.dtos.VeiculoRequestDTO;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -23,4 +24,14 @@ public class Veiculo {
     private int ano;
     private String cor;
     private BigDecimal valorDiaria;
+
+    public Veiculo(VeiculoRequestDTO veiculo) {
+        this.marca = veiculo.marca();
+        this.modelo = veiculo.modelo();
+        this.placa = veiculo.placa();
+        this.ano = veiculo.ano();
+        this.cor = veiculo.cor();
+        this.valorDiaria = veiculo.valorDiaria();
+    }
+
 }

@@ -3,6 +3,8 @@ package br.com.fiap.locatech.locatech.services;
 import java.util.List;
 import java.util.Optional;
 
+import br.com.fiap.locatech.locatech.dtos.PessoaRequestDTO;
+import br.com.fiap.locatech.locatech.services.exceptions.ResourceNotFoundExecption;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -23,16 +25,19 @@ public class PessoaService {
     }
 
     public Optional<Pessoa> findPessoaById(Long id) {
-        return this.pessoaRepository.findById(id);
+        return Optional.ofNullable(this.pessoaRepository.findById(id)
+                .orElseThrow( () -> new ResourceNotFoundExecption("Pessoa não encontrada")));
     }
 
-    public void save(Pessoa pessoa) {
-        var save = this.pessoaRepository.save(pessoa);
-        Assert.state(save == 1, "Erro ao salvar pessoa " + pessoa.getNome());
+    public void save(PessoaRequestDTO pessoa) {
+        var entityPessoa = new Pessoa(pessoa);
+        var save = this.pessoaRepository.save(entityPessoa);
+        Assert.state(save == 1, "Erro ao salvar pessoa " + pessoa.nome());
     }
 
-    public void update(Pessoa pessoa, Long id) {
-        var update = this.pessoaRepository.update(pessoa, id);
+    public void update(PessoaRequestDTO pessoa, Long id) {
+        var entityPessoa = new Pessoa(pessoa);
+        var update = this.pessoaRepository.update(entityPessoa, id);
         if (update == 0) {
             throw new RuntimeException("Pessoa não encontrada.");
         }

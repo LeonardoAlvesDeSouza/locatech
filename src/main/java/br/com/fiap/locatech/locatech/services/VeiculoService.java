@@ -3,6 +3,8 @@ package br.com.fiap.locatech.locatech.services;
 import java.util.List;
 import java.util.Optional;
 
+import br.com.fiap.locatech.locatech.dtos.VeiculoRequestDTO;
+import br.com.fiap.locatech.locatech.services.exceptions.ResourceNotFoundExecption;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -23,16 +25,19 @@ public class VeiculoService {
     }
 
     public Optional<Veiculo> findVeiculoById(Long id) {
-        return this.veiculoRepository.findById(id);
+        return Optional.ofNullable(this.veiculoRepository.findById(id)
+                .orElseThrow( () -> new ResourceNotFoundExecption("Veículo não encontrado")));
     }
 
-    public void saveVeiculo(Veiculo veiculo) {
-        var save = this.veiculoRepository.save(veiculo);
-        Assert.state(save == 1, "Erro ao salvar veículo " + veiculo.getModelo());
+    public void saveVeiculo(VeiculoRequestDTO veiculo) {
+        var entityVeiculo = new Veiculo(veiculo);
+        var save = this.veiculoRepository.save(entityVeiculo);
+        Assert.state(save == 1, "Erro ao salvar veículo " + veiculo.placa());
     }
 
-    public void updateVeiculo(Veiculo veiculo, Long id) {
-        var update = this.veiculoRepository.update(veiculo, id);
+    public void updateVeiculo(VeiculoRequestDTO veiculo, Long id) {
+        var entityVeiculo = new Veiculo(veiculo);
+        var update = this.veiculoRepository.update(entityVeiculo, id);
         if (update == 0) {
             throw new RuntimeException("Veículo não encontrado");
         }
